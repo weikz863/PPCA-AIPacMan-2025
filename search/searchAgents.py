@@ -380,7 +380,7 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     for perm in permutations(notVisitedCorners):
         visitSequence = [state[0]] + list(perm)
         ans = min(ans, sum(map(manhattanDistance, visitSequence, perm)))
-    return ans # Default to trivial solution
+    return ans
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -472,9 +472,30 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    if 'distances' not in problem.heuristicInfo:
+        problem.heuristicInfo['distances'] = {}
+        notWall = [(x, y) for x in range(problem.walls.width) 
+                         for y in range(problem.walls.height) if not problem.walls[x][y]]
+        for point1 in notWall:
+            for point2 in notWall:
+                problem.heuristicInfo['distances'][(point1, point2)] = \
+                  mazeDistance(point1, point2, problem.startingGameState)
+    from itertools import permutations, combinations
+    #from util import manhattanDistance
+    position, foodGrid = state
+    ans = 0
+    notVisitedFood = [(x, y) for x in range(foodGrid.width) 
+                         for y in range(foodGrid.height) if foodGrid[x][y]]
+    for comb in combinations(notVisitedFood, 1): # second argument > 1 results in triviality
+        tmpans = 999999
+        for perm in permutations(comb):
+            visitSequence = [position] + list(perm)
+            tmpans = min(tmpans, sum(map(lambda point1, point2: 
+                                 problem.heuristicInfo['distances'][(point1, point2)], 
+                               visitSequence, perm)))
+        ans = max(ans, tmpans)
+    return ans
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
