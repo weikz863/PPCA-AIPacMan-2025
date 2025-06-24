@@ -87,17 +87,63 @@ def depthFirstSearch(problem: SearchProblem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    #from game import Directions
+    #actionDict = {'South': Directions.SOUTH, 'East': Directions.EAST, 'North': Directions.NORTH, 'West': Directions.WEST}
+    #if problem.isGoalState(problem.getStartState()):
+    #    return []
+    stk = util.Stack()
+    path = {problem.getStartState(): ([], 0)}
+    while True:
+        if stk.isEmpty():
+            currentState = problem.getStartState()
+        else:
+            currentState, lastState, action, cost = stk.pop()
+            if currentState in path:
+                continue
+            else:
+                path[currentState] = (path[lastState][0] + [action], path[lastState][1] + cost)
+        if problem.isGoalState(currentState):
+            return path[currentState][0]
+        for (nextState, action, cost) in problem.getSuccessors(currentState):
+            stk.push((nextState, currentState, action, cost))
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    que = util.Queue()
+    path = {problem.getStartState(): ([], 0)}
+    while True:
+        if que.isEmpty():
+            currentState = problem.getStartState()
+        else:
+            currentState, lastState, action, cost = que.pop()
+            if currentState in path:
+                continue
+            else:
+                path[currentState] = (path[lastState][0] + [action], path[lastState][1] + cost)
+        if problem.isGoalState(currentState):
+            return path[currentState][0]
+        for (nextState, action, cost) in problem.getSuccessors(currentState):
+            que.push((nextState, currentState, action, cost))
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    que = util.PriorityQueueWithFunction(lambda x : x[2])
+    que.push((problem.getStartState(), [], 0))
+    vst = set()
+    while not que.isEmpty():
+        currentState, path, cost = que.pop()
+        if currentState in vst:
+            continue
+        vst.add(currentState)
+        if problem.isGoalState(currentState):
+            return path
+        for (nextState, action, newCost) in problem.getSuccessors(currentState):
+            if nextState in vst:
+                continue
+            que.push((nextState, path + [action], cost + newCost))
+    return []
 
 def nullHeuristic(state, problem=None):
     """
