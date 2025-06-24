@@ -269,5 +269,5 @@ python pacman.py -l bigSearch -p ClosestDotSearchAgent -z .5
 运行以下命令来查看你的实现是否通过了所有自动评分测试用例。
 
 ```
-python autograder.py -q q7
+python autograder.py -q q8
 ```
