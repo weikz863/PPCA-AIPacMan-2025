@@ -284,7 +284,7 @@ class CornersProblem(search.SearchProblem):
         self.walls = startingGameState.getWalls()
         self.startingPosition = startingGameState.getPacmanPosition()
         top, right = self.walls.height-2, self.walls.width-2
-        self.corners = ((1,1), (1,top), (right, 1), (right, top))
+        self.corners = ((1, 1), (1, top), (right, 1), (right, top))
         for corner in self.corners:
             if not startingGameState.hasFood(*corner):
                 print('Warning: no food in corner ' + str(corner))
@@ -296,14 +296,15 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return (self.startingPosition, \
+                tuple(self.startingPosition == corner for corner in self.corners))
 
     def isGoalState(self, state: Any):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return sum(state[1]) == 4
 
     def getSuccessors(self, state: Any):
         """
@@ -326,7 +327,18 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-
+            x, y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            if hitsWall:
+                continue
+            else:
+                successors.append(( \
+                    ((nextx, nexty), \
+                     tuple(visited or ((nextx, nexty) == corner) \
+                           for visited, corner in zip(state[1], self.corners))),\
+                  action, 1))
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
@@ -361,7 +373,14 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    from itertools import permutations
+    from util import manhattanDistance
+    ans = 999999
+    notVisitedCorners = [corner for (corner, vst) in zip(corners, state[1]) if not vst]
+    for perm in permutations(notVisitedCorners):
+        visitSequence = [state[0]] + list(perm)
+        ans = min(ans, sum(map(manhattanDistance, visitSequence, perm)))
+    return ans # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
