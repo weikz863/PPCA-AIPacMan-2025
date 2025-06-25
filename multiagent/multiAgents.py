@@ -204,6 +204,20 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         return alphabeta(gameState, self.depth, self.evaluationFunction, 0)[1]
 
+def expectimax(gameState: GameState, depth, evaluationFunction, agentIndex):
+    if depth == 0 or gameState.isWin() or gameState.isLose():
+        return evaluationFunction(gameState), None
+    strategies = []
+    for action in gameState.getLegalActions(agentIndex):
+        newState = gameState.generateSuccessor(agentIndex, action)
+        nextAgentIndex = (agentIndex + 1) % gameState.getNumAgents()
+        strategies.append((expectimax(newState, depth - (nextAgentIndex == 0), \
+                                   evaluationFunction, nextAgentIndex)[0], action))
+    if agentIndex == 0:
+        return max(strategies, key = lambda x: x[0])
+    else:
+        return sum(map(lambda x: x[0], strategies)) / len(strategies), None
+
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
       Your expectimax agent (question 4)
@@ -217,7 +231,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return expectimax(gameState, self.depth, self.evaluationFunction, 0)[1]
 
 def betterEvaluationFunction(currentGameState: GameState):
     """
