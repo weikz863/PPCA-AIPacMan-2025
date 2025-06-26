@@ -102,7 +102,15 @@ def joinFactors(factors: List[Factor]):
 
 
     "*** YOUR CODE HERE ***"
-    raiseNotDefined()
+    factors = list(factors)
+    variables = functools.reduce(lambda x, y: x | y, [set(factor.variables()) for factor in factors])
+    unconditionedVariables = functools.reduce(lambda x, y: x | y, setsOfUnconditioned)
+    conditionedVariables = variables - unconditionedVariables
+    returnFactor = Factor(list(unconditionedVariables), list(conditionedVariables), factors[0].variableDomainsDict())
+    for assignment in returnFactor.getAllPossibleAssignmentDicts():
+        delta = functools.reduce(lambda x, y: x * y, [factor.getProbability(assignment) for factor in factors])
+        returnFactor.setProbability(assignment, returnFactor.getProbability(assignment) + delta)
+    return returnFactor
     "*** END YOUR CODE HERE ***"
 
 ########### ########### ###########
