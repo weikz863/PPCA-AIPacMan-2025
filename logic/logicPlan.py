@@ -50,7 +50,10 @@ def sentence1() -> Expr:
     (not A) or (not B) or C
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    A = Expr('A')
+    B = Expr('B')
+    C = Expr('C')
+    return conjoin(A | B, (~A) % ((~B) | C), disjoin(~A, ~B, C))
     "*** END YOUR CODE HERE ***"
 
 
@@ -63,7 +66,11 @@ def sentence2() -> Expr:
     (not D) implies C
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    A = Expr('A')
+    B = Expr('B')
+    C = Expr('C')
+    D = Expr('D')
+    return conjoin(C % (B | D), A >> ((~B) & (~D)), (~(B & (~C))) >> A, (~D) >> C)
     "*** END YOUR CODE HERE ***"
 
 
@@ -80,7 +87,15 @@ def sentence3() -> Expr:
     Pacman is born at time 0.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    PacmanAlive_1 = PropSymbolExpr("PacmanAlive", time = 1)
+    PacmanAlive_0 = PropSymbolExpr("PacmanAlive", time = 0)
+    PacmanBorn_0 = PropSymbolExpr("PacmanBorn", time = 0)
+    PacmanKilled_0 = PropSymbolExpr("PacmanKilled", time = 0)
+    return conjoin(
+        PacmanAlive_1 % ((PacmanAlive_0 & ~PacmanKilled_0) | (~PacmanAlive_0 & PacmanBorn_0)), 
+        ~(PacmanAlive_0 & PacmanBorn_0), 
+        PacmanBorn_0
+        )
     "*** END YOUR CODE HERE ***"
 
 def findModel(sentence: Expr) -> Dict[Expr, bool]:
@@ -97,14 +112,15 @@ def findModelUnderstandingCheck() -> Dict[Expr, bool]:
     a = Expr('A')
     "*** BEGIN YOUR CODE HERE ***"
     print("a.__dict__ is:", a.__dict__) # might be helpful for getting ideas
-    util.raiseNotDefined()
+    a.op = 'a'
+    return {a: True}
     "*** END YOUR CODE HERE ***"
 
 def entails(premise: Expr, conclusion: Expr) -> bool:
     """Returns True if the premise entails the conclusion and False otherwise.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return findModel(premise & ~conclusion) == False
     "*** END YOUR CODE HERE ***"
 
 def plTrueInverse(assignments: Dict[Expr, bool], inverse_statement: Expr) -> bool:
@@ -112,7 +128,7 @@ def plTrueInverse(assignments: Dict[Expr, bool], inverse_statement: Expr) -> boo
     pl_true may be useful here; see logic.py for its description.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return pl_true(~inverse_statement, assignments) == True
     "*** END YOUR CODE HERE ***"
 
 #______________________________________________________________________________
