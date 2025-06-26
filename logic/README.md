@@ -172,7 +172,7 @@ python autograder.py -q q2
      - 在 `model2` 中，给定 `x0_y0`，`action0`，`action1`，Pacman 在 $t=1$ 时不在 $(x1, y1)$。这个模型证明 Pacman 可能不在那里。如果 `model2` 为 `False`，我们知道 Pacman 肯定在那里。
    - `action1` 对确定 Pacman 是否在位置上没有影响；它只是在使你的解决方案与自动评分器解决方案匹配。
    - 要实现这个问题，你需要向你的 KB 添加以下表达式：
-     - 向 KB 添加：`pacphysics_axioms(...)`，以及适当的时间。没有 `sensorModel`，因为我们知道吃豆人世界上的一切。需要时，使用 `allLegalSuccessorAxioms` 进行转移，这是针对常规 Pacman 的转移规则。
+     - 向 KB 添加：`pacphysicsAxioms(...)`，以及适当的时间。没有 `sensorModel`，因为我们知道吃豆人世界上的一切。需要时，使用 `allLegalSuccessorAxioms` 进行转移，这是针对常规 Pacman 的转移规则。
      - 向 KB 添加：Pacman 的当前位置 $(x0, y0)$
      - 向 KB 添加：Pacman 执行 `action0`
      - 向 KB 添加：Pacman 执行 `action1`
@@ -272,7 +272,7 @@ python autograder.py -q q5
 对于剩下的问题，我们将依赖以下辅助函数，这些函数将在定位、建图和 SLAM 的伪代码（算法）中引用。
 
 ##### 将 pacphysics、动作和感知信息添加到 KB：
-  - 添加到 KB：`pacphysics_axioms(...)`（你在Q3中编写的）。使用 `sensorAxioms` 和 `allLegalSuccessorAxioms` 进行定位和建图，只在 SLAM 中使用 `SLAMSensorAxioms` 和 `SLAMSuccessorAxioms`。
+  - 添加到 KB：`pacphysicsAxioms(...)`（你在Q3中编写的）。使用 `sensorAxioms` 和 `allLegalSuccessorAxioms` 进行定位和建图，只在 SLAM 中使用 `SLAMSensorAxioms` 和 `SLAMSuccessorAxioms`。
   - 添加到 KB：Pacman 采取由 `agent.actions[t]` 规定的动作。
   - 通过调用 `agent.getPercepts()` 获取感知并将感知传递给 `fourBitPerceptRules(...)` 以进行定位和建图，或传递给 `numAdjWallsPerceptRules(...)` 以进行 SLAM。将生成的 `percept_rules` 添加到 KB。
   
