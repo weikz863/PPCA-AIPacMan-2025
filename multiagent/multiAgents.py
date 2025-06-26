@@ -233,6 +233,10 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         return expectimax(gameState, self.depth, self.evaluationFunction, 0)[1]
 
+def step(pos0, pos1):
+    newPos = [(pos0[0] + dx, pos0[1] + dy) for dx, dy in ((1, 0), (0, 0), (0, 1), (1, 1))]
+    return min(newPos, key = lambda pos: (pos[0] - pos1[0]) ** 2 + (pos[1] - pos1[1]) ** 2)
+
 def betterEvaluationFunction(currentGameState: GameState):
     """
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
@@ -241,7 +245,23 @@ def betterEvaluationFunction(currentGameState: GameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    pos = currentGameState.getPacmanPosition()
+    food = currentGameState.getFood()
+    wall = currentGameState.getWalls()
+    foodPositions = [(x, y) for x in range(food.width) for y in range(food.height) if food[x][y]]
+    foodDistances = [manhattanDistance(pos, t) / float(food.width + food.height) for t in foodPositions]
+    if len(foodDistances) >= 1:
+        if min(foodDistances) < .25:
+            distanceCorrection = -min(foodDistances)
+        else:
+            distanceCorrection = -sum(foodDistances) / len(foodDistances)
+        minDistanceIndex = foodDistances.index(min(foodDistances))
+        stepx, stepy = step(pos, foodPositions[minDistanceIndex])
+        wallPenalty = -wall[stepx][stepy] / (2 * (food.width + food.height))
+    else:
+        distanceCorrection = 0
+        wallPenalty = 0
+    return currentGameState.getScore() + distanceCorrection + wallPenalty
 
 # Abbreviation
 better = betterEvaluationFunction
