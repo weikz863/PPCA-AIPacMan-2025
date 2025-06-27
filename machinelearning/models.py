@@ -101,7 +101,11 @@ class RegressionModel(Module):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
         super().__init__()
-
+        self.hiddenLayerSize = 100
+        self.batchSize = 10
+        self.linear1 = Linear(1, self.hiddenLayerSize)
+        self.linear2 = Linear(self.hiddenLayerSize, 1)
+        self.optimizer = optim.Adam(self.parameters(), lr=0.001)
 
 
     def forward(self, x):
@@ -114,7 +118,7 @@ class RegressionModel(Module):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
-
+        return self.linear2(relu(self.linear1(x)))
     
     def get_loss(self, x, y):
         """
@@ -127,6 +131,7 @@ class RegressionModel(Module):
         Returns: a tensor of size 1 containing the loss
         """
         "*** YOUR CODE HERE ***"
+        return mse_loss(y, self.forward(x))
  
   
 
@@ -145,6 +150,14 @@ class RegressionModel(Module):
             
         """
         "*** YOUR CODE HERE ***"
+        dataloader = DataLoader(dataset, batch_size=self.batchSize, shuffle=True)
+        for _ in range(500):
+            for batch in dataloader:
+                self.optimizer.zero_grad()
+                loss = self.get_loss(batch['x'], batch['label'])
+                loss.backward()
+                self.optimizer.step()
+
 
 
             
@@ -174,8 +187,11 @@ class DigitClassificationModel(Module):
         super().__init__()
         input_size = 28 * 28
         output_size = 10
+        hidden1_size = 100
         "*** YOUR CODE HERE ***"
-
+        self.linear1 = Linear(input_size, hidden1_size)
+        self.linear2 = Linear(hidden1_size, output_size)
+        self.optimizer = optim.Adam(self.parameters(), lr=0.001)
 
 
     def run(self, x):
@@ -193,6 +209,7 @@ class DigitClassificationModel(Module):
                 (also called logits)
         """
         """ YOUR CODE HERE """
+        return self.linear2(relu(self.linear1(x)))
 
 
     def get_loss(self, x, y):
@@ -209,7 +226,7 @@ class DigitClassificationModel(Module):
         Returns: a loss tensor
         """
         """ YOUR CODE HERE """
-
+        return cross_entropy(self.run(x), y)
         
 
     def train(self, dataset):
@@ -217,7 +234,13 @@ class DigitClassificationModel(Module):
         Trains the model.
         """
         """ YOUR CODE HERE """
-
+        dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
+        while dataset.get_validation_accuracy() < 0.98:
+            for batch in dataloader:
+                self.optimizer.zero_grad()
+                loss = self.get_loss(batch['x'], batch['label'])
+                loss.backward()
+                self.optimizer.step()
 
 
 class LanguageIDModel(Module):
