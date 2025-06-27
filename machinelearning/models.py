@@ -261,6 +261,13 @@ class LanguageIDModel(Module):
         super(LanguageIDModel, self).__init__()
         "*** YOUR CODE HERE ***"
         # Initialize your model parameters here
+        hidden1_size = 150
+        hidden2_size = 200
+        self.linear1 = Linear(self.num_chars, hidden1_size)
+        self.linearLast = Linear(hidden2_size, hidden1_size)
+        self.linear2 = Linear(hidden1_size, hidden2_size)
+        self.linearOutput = Linear(hidden2_size, len(self.languages))
+        self.optimizer = optim.Adam(self.parameters(), lr=0.001)
 
 
     def run(self, xs):
@@ -293,7 +300,13 @@ class LanguageIDModel(Module):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
-
+        last = None
+        for i, x in enumerate(xs):
+            partial = self.linear1(x)
+            if i > 0:
+                partial += self.linearLast(last)
+            last = relu(self.linear2(relu(partial)))
+        return self.linearOutput(last)
     
     def get_loss(self, xs, y):
         """
@@ -310,7 +323,7 @@ class LanguageIDModel(Module):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
-
+        return cross_entropy(self.run(xs), y)
 
     def train(self, dataset):
         """
@@ -327,6 +340,14 @@ class LanguageIDModel(Module):
         For more information, look at the pytorch documentation of torch.movedim()
         """
         "*** YOUR CODE HERE ***"
+        dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
+        while dataset.get_validation_accuracy() < 0.85:
+            for batch in dataloader:
+                batch['x'] = movedim(batch['x'], 1, 0)
+                self.optimizer.zero_grad()
+                loss = self.get_loss(batch['x'], batch['label'])
+                loss.backward()
+                self.optimizer.step()
 
         
 
