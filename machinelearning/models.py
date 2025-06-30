@@ -366,10 +366,12 @@ def Convolve(input: tensor, weight: tensor):
     """
     input_tensor_dimensions = input.shape
     weight_dimensions = weight.shape
-    Output_Tensor = tensor(())
+    Output_Tensor = empty(input.shape[0] - weight.shape[0] + 1, input.shape[1] - weight.shape[1] + 1)
     "*** YOUR CODE HERE ***"
-
-    
+    output_dimensions = Output_Tensor.shape
+    for x in range(output_dimensions[0]):
+        for y in range(output_dimensions[1]):
+            Output_Tensor[x, y] = tensordot(weight, input[x: x + weight_dimensions[0], y: y + weight_dimensions[1]])
     "*** End Code ***"
     return Output_Tensor
 
@@ -394,7 +396,11 @@ class DigitConvolutionalModel(Module):
 
         self.convolution_weights = Parameter(ones((3, 3)))
         """ YOUR CODE HERE """
-
+        hidden1_size = 100
+        input_size = 26 * 26
+        self.linear1 = Linear(input_size, hidden1_size)
+        self.linear2 = Linear(hidden1_size, output_size)
+        self.optimizer = optim.Adam(self.parameters(), lr=0.001)
 
     def run(self, x):
         """
@@ -405,7 +411,7 @@ class DigitConvolutionalModel(Module):
         x = stack(list(map(lambda sample: Convolve(sample, self.convolution_weights), x)))
         x = x.flatten(start_dim=1)
         """ YOUR CODE HERE """
-
+        return self.linear2(relu(self.linear1(relu(x))))
  
 
     def get_loss(self, x, y):
@@ -422,7 +428,7 @@ class DigitConvolutionalModel(Module):
         Returns: a loss tensor
         """
         """ YOUR CODE HERE """
-
+        return cross_entropy(self.run(x), y)
         
 
     def train(self, dataset):
@@ -430,4 +436,10 @@ class DigitConvolutionalModel(Module):
         Trains the model.
         """
         """ YOUR CODE HERE """
- 
+        dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
+        while dataset.get_validation_accuracy() < 0.85:
+            for batch in dataloader:
+                self.optimizer.zero_grad()
+                loss = self.get_loss(batch['x'], batch['label'])
+                loss.backward()
+                self.optimizer.step()
