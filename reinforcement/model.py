@@ -24,10 +24,20 @@ class DeepQNetwork(Module):
         # Remember to set self.learning_rate, self.numTrainingGames,
         # and self.batch_size!
         "*** YOUR CODE HERE ***"
-        self.learning_rate = 0
-        self.numTrainingGames = 0
-        self.batch_size = 0
-
+        self.learning_rate = 0.01
+        self.numTrainingGames = 4000
+        self.batch_size = 128
+        # hidden1_size = 500
+        # self.linear1 = Linear(state_dim, hidden1_size)
+        # self.linear2 = Linear(hidden1_size, action_dim)
+        hidden1_size = 500
+        hidden2_size = 500
+        hidden3_size = 500
+        self.linear1 = Linear(state_dim, hidden1_size)
+        self.linear2 = Linear(hidden1_size, hidden2_size)
+        self.linear3 = Linear(hidden2_size, hidden3_size)
+        self.linear4 = Linear(hidden3_size, action_dim)
+        self.optimizer = optim.SGD(self.parameters(), lr=self.learning_rate)
         "**END CODE"""
         self.double()
 
@@ -43,7 +53,7 @@ class DeepQNetwork(Module):
             loss node between Q predictions and Q_target
         """
         "*** YOUR CODE HERE ***"
-
+        return mse_loss(self.forward(states), Q_target)
 
     def forward(self, states):
         """
@@ -53,13 +63,12 @@ class DeepQNetwork(Module):
         as input the state s and computes the vector [Q(s, a_1), Q(s, a_2)]
         Inputs:
             states: a (batch_size x state_dim) numpy array
-            Q_target: a (batch_size x num_actions) numpy array, or None
         Output:
             result: (batch_size x num_actions) numpy array of Q-value
                 scores, for each of the actions
         """
         "*** YOUR CODE HERE ***"
-
+        return self.linear4(relu(self.linear3(relu(self.linear2(relu(self.linear1(states)))))))
     
     def run(self, states):
         return self.forward(states)
@@ -78,3 +87,7 @@ class DeepQNetwork(Module):
             None
         """
         "*** YOUR CODE HERE ***"
+        self.optimizer.zero_grad()
+        loss = self.get_loss(states, Q_target)
+        loss.backward()
+        self.optimizer.step()
